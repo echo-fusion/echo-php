@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Controllers\CommentController;
+use App\View;
 use App\Router;
 use App\Controllers\AuthController;
 use App\Controllers\BlogController;
+use App\Controllers\CommentController;
 
 return function (Router $router) {
     // blog
@@ -25,6 +26,6 @@ return function (Router $router) {
 
     // closure routeing without rendering with twig
     $router->get('/imprint', function () {
-        echo 'imprint page';
+        return View::make('imprint');
     });
 };
