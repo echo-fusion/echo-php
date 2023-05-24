@@ -20,9 +20,9 @@ class UserRepository implements UserRepositoryInterface
 
     /**
      * @param array $data
-     * @return int
+     * @return UserInterface
      */
-    public function create(array $data): int
+    public function create(array $data): UserInterface
     {
         $stmt = $this->model->db->prepare(
             'INSERT INTO blogs (title, description,image_url, created_at) VALUES (?,?,?,?)'
@@ -34,7 +34,13 @@ class UserRepository implements UserRepositoryInterface
             new \DateTime(),
         ]);
 
-        return (int)$this->db->lastInsertId();
+        $result = $this->find((int)$this->db->lastInsertId());
+        $userModel = new User();
+        $userModel->setId($result['id']);
+        $userModel->setId($result['email']);
+        $userModel->setPassword($result['password']);
+
+        return $userModel;
     }
 
     /**

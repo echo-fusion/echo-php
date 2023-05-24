@@ -27,6 +27,15 @@ class User extends AbstractModel implements UserInterface
     }
 
     /**
+     * @param int $id
+     * @return int
+     */
+    public function setId(int $id)
+    {
+        return $this->id = $id;
+    }
+
+    /**
      * @return string
      */
     public function getPassword(): string

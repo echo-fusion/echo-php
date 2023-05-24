@@ -12,7 +12,7 @@ abstract class AbstractModel
     /**
      * @var DB
      */
-    protected DB $db;
+    public DB $db;
 
     /**
      *
