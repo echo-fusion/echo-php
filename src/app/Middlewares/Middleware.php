@@ -12,7 +12,17 @@ use App\Exceptions\MiddlewareException;
 
 class Middleware
 {
-    public const MAP = [
+    /**
+     * @var array|string[]
+     */
+    public const Middleware = [
+        'start_session' => StartSessionMiddleware::class,
+    ];
+
+    /**
+     * @var array|string[]
+     */
+    public const RouteMiddleware = [
         'guest' => GuestMiddleware::class,
         'auth' => AuthMiddleware::class,
     ];
@@ -27,18 +37,36 @@ class Middleware
      */
     public static function resolve($key, Container $container): void
     {
+        // middlewares
+        foreach (self::Middleware as $middleware) {
+            self::callMiddleware($container, $middleware);
+        }
+
+        // route middleware
         if (!$key) {
             return;
         }
 
-        $middleware = static::MAP[$key] ?? false;
-
-        if (!$middleware) {
+        $routeMiddleware = self::RouteMiddleware[$key] ?? false;
+        if (!$routeMiddleware) {
             throw new MiddlewareException("Not matching middleware found for key '{$key}' . ");
         }
 
-        /** @var MiddlewareInterface  $middlewareObj */
-        $middlewareObj = $container->get($middleware);
+        self::callMiddleware($container, $routeMiddleware);
+
+    }
+
+    /**
+     * @param Container $container
+     * @param string $key
+     * @return void
+     * @throws ContainerException
+     * @throws ReflectionException
+     */
+    private static function callMiddleware(Container $container, string $key)
+    {
+        /** @var MiddlewareInterface $middlewareObj */
+        $middlewareObj = $container->get($key);
         $middlewareObj->handle();
     }
 }
