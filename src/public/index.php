@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\App;
 use App\Container;
 use App\Router;
 
@@ -14,5 +15,7 @@ $router = new Router($container);
 $routes = require CONFIG_PATH . '/routes.php';
 $routes($router);
 
-// resolve router
-echo $router->resolve($_SERVER['REQUEST_URI'], strtolower($_SERVER['REQUEST_METHOD']));
+$app = new App($container);
+$app->setRouter($router);
+$app->setRequest(['uri' => $_SERVER['REQUEST_URI'], 'method' => $_SERVER['REQUEST_METHOD']]);
+$app->run();
