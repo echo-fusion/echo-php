@@ -12,23 +12,36 @@ use App\Exceptions\RouteNotFoundException;
 class App
 {
     /**
-     * @param Container $container
-     * @param Router|null $router
+     * @var DB
+     */
+    private static DB $db;
+
+    /**
+     * @param ContainerInterface $container
+     * @param RouterInterface|null $router
      * @param array $request
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function __construct(
         protected ContainerInterface $container,
         protected ?RouterInterface $router = null,
         protected array $request = [],
     ) {
-        //
+        // initial db
+        static::$db = $container->get(DB::class);
+    }
+
+    /**
+     * @return DB
+     */
+    public static function db(): DB
+    {
+        return static::$db;
     }
 
     /**
      * @return void
-     * @throws Exceptions\ContainerException
-     * @throws Exceptions\MiddlewareException
-     * @throws ReflectionException
      */
     public function run(): void
     {
