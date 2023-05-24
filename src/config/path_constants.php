@@ -7,3 +7,4 @@ const APP_PATH = __DIR__ . '/../app';
 const PUBLIC_PATH = __DIR__ . '/../public';
 const CONFIG_PATH = __DIR__ . '/../config';
 const VIEW_PATH = __DIR__ . '/../view';
+const STORAGE_PATH = __DIR__ . '/../storage';
