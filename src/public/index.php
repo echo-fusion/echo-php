@@ -3,13 +3,11 @@
 declare(strict_types=1);
 
 use App\App;
-use App\Container;
 use App\Router;
 
-require __DIR__ . '/../config/path_constants.php';
-require ROOT_PATH . '/vendor/autoload.php';
-
-$container = new Container();
+/** @var App $app **/
+$app = require __DIR__ . '/../bootstrap.php';
+$container = $app->getContainer();
 
 $router = new Router($container);
 $routes = require CONFIG_PATH . '/routes.php';
