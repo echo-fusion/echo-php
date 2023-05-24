@@ -1,0 +1,25 @@
+{
+  "name": "amir-shadanfar/blog_platform",
+  "type": "project",
+  "keywords": [
+    "Php",
+    "mvc",
+    "framework"
+  ],
+  "require": {
+    "php": "^8.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Amir shadanfar",
+      "email": "a.shadanfar.it@gmail.com"
+    }
+  ],
+  "minimum-stability": "dev",
+  "license": "MIT"
+}
