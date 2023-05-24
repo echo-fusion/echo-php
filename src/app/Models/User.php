@@ -17,6 +17,7 @@ class User extends AbstractModel implements UserInterface
 
     public function __construct()
     {
+        parent::__construct();
         $this->table = 'users';
     }
 

@@ -25,11 +25,12 @@ class UserRepository implements UserRepositoryInterface
     public function create(array $data): UserInterface
     {
         $stmt = $this->model->db->prepare(
-            'INSERT INTO blogs (title, description,image_url, created_at) VALUES (?,?,?,?)'
+            'INSERT INTO users (name, email, password, created_at) VALUES (?,?,?,?)'
         );
 
         $stmt->execute([
             $data['name'],
+            $data['email'],
             password_hash($data['password'], PASSWORD_BCRYPT, ['cost' => 12]),
             new \DateTime(),
         ]);
@@ -37,6 +38,7 @@ class UserRepository implements UserRepositoryInterface
         $result = $this->find((int)$this->db->lastInsertId());
         $userModel = new User();
         $userModel->setId($result['id']);
+        $userModel->setName($result['name']);
         $userModel->setId($result['email']);
         $userModel->setPassword($result['password']);
 
