@@ -3,10 +3,12 @@
 declare(strict_types=1);
 
 use App\Contracts\SessionInterface;
+use App\Contracts\UserInterface;
 use App\DB;
 use App\Config;
 use App\Container;
 use App\Migrations\Migration;
+use App\Repositories\UserRepository;
 use App\Session;
 
 
@@ -26,5 +28,6 @@ $container->bind(Migration::class, function (Container $container) {
 });
 
 $container->bind(SessionInterface::class, Session::class);
+$container->bind(UserInterface::class, UserRepository::class);
 
 return $container;

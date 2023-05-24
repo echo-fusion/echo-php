@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Contracts\UserInterface;
 use DateTime;
 
-class User extends AbstractModel
+class User extends AbstractModel implements UserInterface
 {
+    private int $id;
     private string $name;
     private string $email;
     private string $password;
@@ -16,6 +18,21 @@ class User extends AbstractModel
     public function __construct()
     {
         $this->table = 'users';
+    }
+
+    public function getId(): int
+    {
+        // TODO: Implement getId() method.
+        return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPassword(): string
+    {
+        // TODO: Implement getPassword() method.
+        return $this->password;
     }
 
     /**
@@ -48,14 +65,6 @@ class User extends AbstractModel
     public function setEmail(string $email): void
     {
         $this->email = $email;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPassword(): string
-    {
-        return $this->password;
     }
 
     /**
