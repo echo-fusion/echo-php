@@ -35,7 +35,7 @@ class UserRepository implements UserRepositoryInterface
             new \DateTime(),
         ]);
 
-        $result = $this->find((int)$this->db->lastInsertId());
+        $result = $this->find((int)$this->model->db->lastInsertId());
         $userModel = new User();
         $userModel->setId($result['id']);
         $userModel->setName($result['name']);
@@ -50,7 +50,7 @@ class UserRepository implements UserRepositoryInterface
      */
     public function all(): mixed
     {
-        $stmt = $this->db->prepare('SELECT * FROM users order by created_at DESC');
+        $stmt = $this->model->db->prepare('SELECT * FROM users order by created_at DESC');
 
         $stmt->execute();
 
@@ -63,7 +63,7 @@ class UserRepository implements UserRepositoryInterface
      */
     public function find($id): ?UserInterface
     {
-        $stmt = $this->db->prepare('SELECT * FROM users where id=?');
+        $stmt = $this->model->db->prepare('SELECT * FROM users where id=?');
         $stmt->execute([$id]);
         $result = $stmt->fetch();
 
@@ -83,7 +83,7 @@ class UserRepository implements UserRepositoryInterface
      */
     public function getByCredentials(array $credentials): ?UserInterface
     {
-        $stmt = $this->db->prepare('SELECT * FROM users where email=?');
+        $stmt = $this->model->db->prepare('SELECT * FROM users where email=?');
         $stmt->execute([$credentials['email']]);
         $result = $stmt->fetch();
 
