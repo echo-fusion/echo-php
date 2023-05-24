@@ -5,28 +5,30 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Contracts\AuthInterface;
-use App\Contracts\SessionInterface;
 use App\Exceptions\ValidationException;
 use App\View;
+use Twig\Environment;
 use Valitron\Validator;
 
 class AuthController extends AbstractController
 {
     /**
      * @param AuthInterface $auth
+     * @param Environment $twig
      */
     public function __construct(
         private readonly AuthInterface $auth,
+        private readonly Environment $twig
     ) {
         //
     }
 
     /**
-     * @return View
+     * @return string
      */
-    public function loginPage(): View
+    public function loginPage(): string
     {
-        return View::make('auth/login');
+        return $this->twig->render('auth/login.twig');
     }
 
     /**
@@ -56,11 +58,11 @@ class AuthController extends AbstractController
     }
 
     /**
-     * @return View
+     * @return string
      */
-    public function registerPage(): View
+    public function registerPage(): string
     {
-        return View::make('auth/register');
+        return $this->twig->render('auth/register.twig');
     }
 
     /**
