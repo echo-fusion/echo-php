@@ -6,6 +6,7 @@ namespace App;
 
 use App\Contracts\RouterInterface;
 use App\Exceptions\RouteNotFoundException;
+use App\Middlewares\Middleware;
 use ReflectionException;
 
 class Router implements RouterInterface
@@ -107,6 +108,7 @@ class Router implements RouterInterface
      * @param string $requestMethod
      * @return mixed
      * @throws Exceptions\ContainerException
+     * @throws Exceptions\MiddlewareException
      * @throws ReflectionException
      * @throws RouteNotFoundException
      */
@@ -118,6 +120,8 @@ class Router implements RouterInterface
         $action = null;
         foreach ($this->routes as $route) {
             if ($route['route'] == $requestRoute && $route['method'] == strtolower($requestMethod)) {
+                // check the route has any middleware
+                Middleware::resolve($route['middleware'], $this->container);
                 // get action
                 $action = $route['action'];
             }
