@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Container;
+use App\Router;
+
 require __DIR__ . '/../vendor/autoload.php';
 
-$router = new App\Router();
+$container = new Container();
+$router = new Router($container);
 
-// define routes
-$router->get('/test', function () {
-    echo  'This is test route!';
-});
 
 // resolve router
 echo $router->resolve($_SERVER['REQUEST_URI'], strtolower($_SERVER['REQUEST_METHOD']));

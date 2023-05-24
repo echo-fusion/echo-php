@@ -16,9 +16,9 @@ class Router implements RouterInterface
     private array $routes = [];
 
     /**
-     * 
+     * @param Container $container
      */
-    public function __construct()
+    public function __construct(private readonly Container $container)
     {
         //
     }
@@ -106,8 +106,9 @@ class Router implements RouterInterface
      * @param string $requestUri
      * @param string $requestMethod
      * @return mixed
-     * @throws RouteNotFoundException
+     * @throws Exceptions\ContainerException
      * @throws ReflectionException
+     * @throws RouteNotFoundException
      */
     public function resolve(string $requestUri, string $requestMethod)
     {
@@ -133,7 +134,7 @@ class Router implements RouterInterface
         if (is_array($action)) {
             [$class, $method] = $action;
             if (class_exists($class)) {
-                $class = new $class;
+                $class = $this->container->get($class);
                 if (method_exists($class, $method)) {
                     return call_user_func([$class, $method], []);
                 }
