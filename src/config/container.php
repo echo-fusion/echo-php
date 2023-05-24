@@ -6,10 +6,12 @@ use App\Auth;
 use App\Contracts\AuthInterface;
 use App\Contracts\SessionInterface;
 use App\Contracts\UserInterface;
+use App\Contracts\UserRepositoryInterface;
 use App\DB;
 use App\Config;
 use App\Container;
 use App\Migrations\Migration;
+use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Session;
 
@@ -30,7 +32,8 @@ $container->bind(Migration::class, function (Container $container) {
 });
 
 $container->bind(SessionInterface::class, Session::class);
-$container->bind(UserInterface::class, UserRepository::class);
+$container->bind(UserInterface::class, fn() => new User());
+$container->bind(UserRepositoryInterface::class, UserRepository::class);
 $container->bind(AuthInterface::class, Auth::class);
 
 return $container;
