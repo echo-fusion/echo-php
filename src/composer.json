@@ -7,6 +7,7 @@
     "framework"
   ],
   "require": {
+    "ext-pdo": "*",
     "php": "^8.1",
     "psr/container": "^2.0@dev",
     "vlucas/phpdotenv": "^5.5@dev"
