@@ -1,5 +1,5 @@
 {
-  "name": "amir-shadanfar/blog_platform",
+  "name": "amir-shadanfar/php_framework",
   "type": "project",
   "keywords": [
     "Php",
@@ -12,7 +12,7 @@
     "psr/container": "^2.0@dev",
     "vlucas/phpdotenv": "^5.5@dev",
     "vlucas/valitron": "dev-master",
-    "twig/twig": "3.x-dev"
+    "twig/twig": "3.x-dev",
   },
   "require-dev": {
     "phpunit/phpunit": "^9.5"

@@ -23,7 +23,6 @@ class User extends AbstractModel implements UserInterface
 
     public function getId(): int
     {
-        // TODO: Implement getId() method.
         return $this->id;
     }
 
@@ -41,7 +40,6 @@ class User extends AbstractModel implements UserInterface
      */
     public function getPassword(): string
     {
-        // TODO: Implement getPassword() method.
         return $this->password;
     }
 

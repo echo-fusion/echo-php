@@ -36,6 +36,7 @@ class UserRepository implements UserRepositoryInterface
         ]);
 
         $result = $this->find((int)$this->model->db->lastInsertId());
+
         $userModel = new User();
         $userModel->setId($result['id']);
         $userModel->setName($result['name']);

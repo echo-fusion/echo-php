@@ -1,6 +1,4 @@
-# Blogging system
-This is a blog project without using frameworks.
-
+# Simple php framework
 
 ## Running the project
 For the first time
