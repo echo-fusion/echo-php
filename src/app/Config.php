@@ -4,44 +4,23 @@ declare(strict_types=1);
 
 namespace App;
 
-use App\Enums\AppEnvironment;
+use App\Contracts\ConfigInterface;
 
-/**
- * @property-read ?array $db
- * @property-read ?string $environment
- */
-class Config
+class Config implements ConfigInterface
 {
-    /**
-     * @var array
-     */
-    protected array $config = [];
+    protected array $config;
 
-    /**
-     * @param array $env
-     */
-    public function __construct(array $env)
+    public function __construct(array ...$configs)
     {
-        $appEnv = $env['APP_ENV'] ?? AppEnvironment::Production->value;
-
-        $this->config = [
-            'environment' => $appEnv,
-            'db' => [
-                'host' => $env['DB_HOST'],
-                'username' => $env['DB_USER'],
-                'password' => $env['DB_PASS'],
-                'database' => $env['DB_DATABASE'],
-                'driver' => $env['DB_DRIVER'] ?? 'mysql',
-            ],
-        ];
+        $mergedConfig = [];
+        foreach ($configs as $config) {
+            $mergedConfig = array_merge($mergedConfig, $config);
+        }
+        $this->config = $mergedConfig;
     }
 
-    /**
-     * @param string $name
-     * @return mixed|null
-     */
-    public function __get(string $name)
+    public function getMerged(): array
     {
-        return $this->config[$name] ?? null;
+        return $this->config;
     }
 }
