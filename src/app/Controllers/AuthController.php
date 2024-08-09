@@ -6,36 +6,28 @@ namespace App\Controllers;
 
 use App\Contracts\AuthInterface;
 use App\Exceptions\ValidationException;
-use App\View;
+use Psr\Http\Message\ServerRequestInterface;
 use Twig\Environment;
 use Valitron\Validator;
 
 class AuthController extends AbstractController
 {
-    /**
-     * @param AuthInterface $auth
-     * @param Environment $twig
-     */
     public function __construct(
         private readonly AuthInterface $auth,
         private readonly Environment $twig
     ) {
-        //
     }
 
-    /**
-     * @return string
-     */
     public function loginPage(): string
     {
         return $this->twig->render('auth/login.twig');
     }
 
-    /**
-     * @return void
-     */
-    public function login()
+    public function login(ServerRequestInterface $request)
     {
+        var_dump();die();
+
+
         $input = $_POST;
         try {
             $validator = new Validator($input);
@@ -50,24 +42,18 @@ class AuthController extends AbstractController
             // redirect
             http_response_code(302);
 
-            header('Location: /blogs');
+            header('Location: /');
             exit;
         } catch (\Throwable $exception) {
 
         }
     }
 
-    /**
-     * @return string
-     */
     public function registerPage(): string
     {
         return $this->twig->render('auth/register.twig');
     }
 
-    /**
-     * @return void
-     */
     public function register()
     {
         $input = $_POST;
@@ -82,16 +68,14 @@ class AuthController extends AbstractController
             // redirect
             http_response_code(302);
 
-            header('Location: /blogs');
+            header('Location: /');
             exit;
         } catch (\Throwable $exception) {
 
         }
     }
 
-    /**
-     * @return void
-     */
+
     public function logout()
     {
         $this->auth->logOut();

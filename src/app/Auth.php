@@ -4,18 +4,15 @@ declare(strict_types=1);
 
 namespace App;
 
-use App\Contracts\UserRepositoryInterface;
-use App\Exceptions\ValidationException;
-use App\Contracts\UserInterface;
 use App\Contracts\AuthInterface;
 use App\Contracts\SessionInterface;
+use App\Entities\User;
+use App\Exceptions\ValidationException;
+use App\Modules\User\Contracts\UserRepositoryInterface;
 
 class Auth implements AuthInterface
 {
-    /**
-     * @var UserInterface|null
-     */
-    private ?UserInterface $user = null;
+    private ?User $user = null;
 
     /**
      * @param SessionInterface $session
@@ -29,9 +26,9 @@ class Auth implements AuthInterface
     }
 
     /**
-     * @return UserInterface|null
+     * @return User|null
      */
-    public function user(): ?UserInterface
+    public function user(): ?User
     {
         if ($this->user !== null) {
             return $this->user;
@@ -59,7 +56,10 @@ class Auth implements AuthInterface
      */
     public function attemptLogin(array $credentials): bool
     {
-        $user = $this->userRepository->getByCredentials($credentials);
+        $email = $credentials['email'];
+        $password = $credentials['password'];
+
+        $user = $this->userRepository->getByCredentials($email, $password);
         if (!$user) {
             return false;
         }
@@ -75,10 +75,10 @@ class Auth implements AuthInterface
     }
 
     /**
-     * @param UserInterface $user
+     * @param User $user
      * @return void
      */
-    public function logIn(UserInterface $user): void
+    public function logIn(User $user): void
     {
         $this->session->regenerate();
         $this->session->put('user', $user->getId());
@@ -96,11 +96,15 @@ class Auth implements AuthInterface
 
     /**
      * @param array $data
-     * @return UserInterface
+     * @return User
      */
-    public function register(array $data): UserInterface
+    public function register(array $data): User
     {
-        $user = $this->userRepository->create($data);
+        $user = $this->userRepository->create(
+            $data['name'],
+            $data['email'],
+            $data['password'],
+        );
 
         // make user logged in
         $this->logIn($user);
