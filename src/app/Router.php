@@ -6,123 +6,103 @@ namespace App;
 
 use App\Contracts\RouterInterface;
 use App\Exceptions\RouteNotFoundException;
-use App\Middlewares\Middleware;
-use ReflectionException;
+use App\Middlewares\Pattern\MiddlewarePipeline;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 class Router implements RouterInterface
 {
-    /**
-     * @var array
-     */
     private array $routes = [];
 
-    /**
-     * @param Container $container
-     */
-    public function __construct(private readonly Container $container)
-    {
-        //
+    public function __construct(
+        protected readonly ContainerInterface $container,
+        protected readonly MiddlewarePipeline $middlewarePipeline,
+    ) {
     }
 
-    /**
-     * @param string $requestMethod
-     * @param string $route
-     * @param callable|array $action
-     * @return $this
-     */
     public function register(string $requestMethod, string $route, callable|array $action): self
     {
         $this->routes[] = [
             'method' => $requestMethod,
             'route' => $route,
             'action' => $action,
-            'middleware' => null,
+            'middlewares' => clone $this->middlewarePipeline,
         ];
 
         return $this;
     }
 
     /**
-     * use for adding middleware
-     *
-     * @param $key
-     * @return $this
+     * @param list<string> $middlewares
+     * @return Router
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
-    public function only($key): self
+    public function middlewares(string ...$middlewares): self
     {
-        $this->routes[array_key_last($this->routes)]['middleware'] = $key;
+        $lastIndex = array_key_last($this->routes);
+        $lastRoute = $this->routes[$lastIndex];
+
+        /**@var MiddlewarePipeline $routeMiddleware */
+        $routeMiddlewarePipeline = $lastRoute['middlewares'];
+
+        foreach ($middlewares as $middleware) {
+            $routeMiddlewarePipeline->pipe(
+                $this->container->get($middleware)
+            );
+        }
+
+        $this->routes[$lastIndex]['middlewares'] = $routeMiddlewarePipeline;
 
         return $this;
     }
 
-    /**
-     * @param string $route
-     * @param callable|array $action
-     * @return $this
-     */
     public function get(string $route, callable|array $action): self
     {
         return $this->register('get', $route, $action);
     }
 
-    /**
-     * @param string $route
-     * @param callable|array $action
-     * @return $this
-     */
     public function post(string $route, callable|array $action): self
     {
         return $this->register('post', $route, $action);
     }
 
-    /**
-     * @param string $route
-     * @param callable|array $action
-     * @return $this
-     */
     public function put(string $route, callable|array $action): self
     {
         return $this->register('put', $route, $action);
     }
 
-    /**
-     * @param string $route
-     * @param callable|array $action
-     * @return $this
-     */
     public function delete(string $route, callable|array $action): self
     {
         return $this->register('delete', $route, $action);
     }
 
-    /**
-     * @return array
-     */
     public function routes(): array
     {
         return $this->routes;
     }
 
-    /**
-     * @param string $requestUri
-     * @param string $requestMethod
-     * @return mixed
-     * @throws Exceptions\ContainerException
-     * @throws Exceptions\MiddlewareException
-     * @throws ReflectionException
-     * @throws RouteNotFoundException
-     */
-    public function resolve(string $requestUri, string $requestMethod)
+    public function resolve(ServerRequestInterface $request): mixed
     {
-        // trim querystring from uri
-        $requestRoute = strtok($requestUri, '?');
+        $requestRoute = $request->getUri()->getPath();
+        $requestMethod = $request->getMethod();
 
         $action = null;
         foreach ($this->routes as $route) {
             if ($route['route'] == $requestRoute && $route['method'] == strtolower($requestMethod)) {
-                // check the route has any middleware
-                Middleware::resolve($route['middleware'], $this->container);
-                // get action
+                // run middleware
+                /** @var MiddlewarePipeline $routeMiddlewaresPipeline */
+                $routeMiddlewaresPipeline = $route['middlewares'];
+                if (!$routeMiddlewaresPipeline->isPipeLineEmpty()) {
+                    $routeMiddlewaresPipeline->process(
+                        $request,
+                        $this->container->get(RequestHandlerInterface::class)
+                    );
+                }
+
                 $action = $route['action'];
             }
         }
@@ -140,7 +120,7 @@ class Router implements RouterInterface
             if (class_exists($class)) {
                 $class = $this->container->get($class);
                 if (method_exists($class, $method)) {
-                    return call_user_func([$class, $method], []);
+                    return call_user_func([$class, $method], $request);
                 }
             }
         }

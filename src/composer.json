@@ -1,5 +1,5 @@
 {
-  "name": "amir-shadanfar/php_framework",
+  "name": "amir-shadanfar/php-framework",
   "type": "project",
   "keywords": [
     "Php",
@@ -13,6 +13,14 @@
     "vlucas/phpdotenv": "^5.5@dev",
     "vlucas/valitron": "dev-master",
     "twig/twig": "3.x-dev",
+    "doctrine/migrations": "4.0.x-dev",
+    "doctrine/orm": "3.3.x-dev",
+    "doctrine/dbal": "4.1.x-dev",
+    "symfony/cache": "6.4.x-dev",
+    "psr/http-factory": "^1.1",
+    "guzzle/guzzle": "^3.8",
+    "psr/http-server-middleware": "^1.0@dev",
+    "guzzlehttp/psr7": "3.0.x-dev"
   },
   "require-dev": {
     "phpunit/phpunit": "^9.5"

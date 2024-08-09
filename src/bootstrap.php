@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\App;
+use App\Config;
+use App\Container;
 use Dotenv\Dotenv;
 
 require __DIR__ . '/config/path_constants.php';
@@ -12,7 +14,14 @@ require ROOT_PATH . '/vendor/autoload.php';
 $dotenv = Dotenv::createImmutable(ROOT_PATH);
 $dotenv->load();
 
-// initial container
-$container = require CONFIG_PATH . '/container.php';
+$container = new Container();
+$containers = require CONFIG_PATH . '/container.php';
+$containers($container);
 
-return new App($container);
+/** @var Config $config */
+$config = require CONFIG_PATH . '/application.config.php';
+
+return new App(
+    $container,
+    $config
+);

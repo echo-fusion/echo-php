@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace App;
 
+use App\Contracts\ConfigInterface;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use ReflectionException;
 use App\Contracts\RouterInterface;
 use Psr\Container\ContainerInterface;
@@ -11,96 +16,36 @@ use App\Exceptions\RouteNotFoundException;
 
 class App
 {
-    /**
-     * @var DB
-     */
-    private static DB $db;
+    protected RouterInterface $router;
+    protected ServerRequestInterface $request;
 
-    /**
-     * @param ContainerInterface $container
-     * @param RouterInterface|null $router
-     * @param array $request
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
-     */
     public function __construct(
         protected ContainerInterface $container,
-        protected ?RouterInterface $router = null,
-        protected array $request = [],
+        protected ConfigInterface $config
     ) {
-        // initial db
-        static::$db = $container->get(DB::class);
     }
 
-    /**
-     * @return DB
-     */
-    public static function db(): DB
-    {
-        return static::$db;
-    }
-
-    /**
-     * @return void
-     */
     public function run(): void
     {
-        try {
-            echo $this->router->resolve($this->request['uri'], strtolower($this->request['method']));
-        } catch (RouteNotFoundException) {
-            http_response_code(404);
-
-            echo View::make('errors/404');
-        }
+        echo $this->router->resolve($this->request);
     }
 
-    /**
-     * @return Container
-     */
-    public function getContainer(): Container
+    public function getContainer(): ContainerInterface
     {
         return $this->container;
     }
 
-    /**
-     * @param ContainerInterface $container
-     * @return void
-     */
-    public function setContainer(ContainerInterface $container): void
+    public function getConfig(): ConfigInterface
     {
-        $this->container = $container;
+        return $this->config;
     }
 
-    /**
-     * @return Router|null
-     */
-    public function getRouter(): ?Router
-    {
-        return $this->router;
-    }
-
-    /**
-     * @param Router $router
-     * @return void
-     */
     public function setRouter(Router $router): void
     {
         $this->router = $router;
     }
 
-    /**
-     * @return array|null
-     */
-    public function getRequest(): ?array
-    {
-        return $this->request;
-    }
-
-    /**
-     * @param array $request
-     * @return void
-     */
-    public function setRequest(array $request): void
+    public function setRequest(ServerRequestInterface $request): void
     {
         $this->request = $request;
     }

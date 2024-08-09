@@ -3,17 +3,30 @@
 declare(strict_types=1);
 
 use App\App;
+use App\Contracts\MiddlewareFactoryInterface;
 use App\Router;
+use Psr\Http\Message\ServerRequestInterface;
 
-/** @var App $app **/
-$app = require __DIR__ . '/../bootstrap.php';
-$container = $app->getContainer();
+(function () {
+    /** @var App $application * */
+    $application = require __DIR__ . '/../bootstrap.php';
+    $container = $application->getContainer();
 
-$router = new Router($container);
-$routes = require CONFIG_PATH . '/routes.php';
-$routes($router);
+    /** @var MiddlewareFactoryInterface $middlewareFactory * */
+    $middlewareFactory = $container->get(MiddlewareFactoryInterface::class);
+    $middlewarePipeline = $middlewareFactory->createPipeline();
 
-$app = new App($container);
-$app->setRouter($router);
-$app->setRequest(['uri' => $_SERVER['REQUEST_URI'], 'method' => $_SERVER['REQUEST_METHOD']]);
-$app->run();
+    $router = new Router($container, $middlewarePipeline);
+    $routes = require CONFIG_PATH . '/routes.php';
+    $routes($router);
+
+    $application->setRouter($router);
+    $application->setRequest($container->get(ServerRequestInterface::class));
+
+    try {
+        $application->run();
+        exit(0);
+    } catch (Throwable $exception) {
+        //
+    }
+})();

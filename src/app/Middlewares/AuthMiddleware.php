@@ -4,19 +4,28 @@ declare(strict_types=1);
 
 namespace App\Middlewares;
 
-use App\Contracts\MiddlewareInterface;
+use App\Contracts\SessionInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 class AuthMiddleware implements MiddlewareInterface
 {
-    /**
-     * @return void
-     */
-    public function handle(): void
+    public function __construct(private readonly SessionInterface $session)
     {
-        $user = $_SESSION['user'] ?? false;
+    }
+
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    {
+        $user = $this->session->has('user') && $this->session->get('user');
+
+        // @todo: redirect to login or sent 401 response
         if (!$user) {
             header('location: /');
             exit();
         }
+
+        return $handler->handle($request);
     }
 }

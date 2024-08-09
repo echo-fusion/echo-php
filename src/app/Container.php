@@ -10,9 +10,6 @@ use ReflectionException;
 
 class Container implements ContainerInterface
 {
-    /**
-     * @var array
-     */
     private array $entries = [];
 
     /**
@@ -97,11 +94,10 @@ class Container implements ContainerInterface
             }
 
             if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
-                // for every parameter do the same steps to resolve dependencies
                 return $this->get($type->getName());
             }
 
-            throw new ContainerException('Failed to resolve the class ' . $id . ' because invalid param ');
+            throw new ContainerException('Failed to resolve the class ' . $id . ' because invalid params!');
         }, $parameters);
 
         return $reflectionClass->newInstanceArgs($dependencies);

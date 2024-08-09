@@ -7,5 +7,6 @@ namespace App\Enums;
 enum AppEnvironment: string
 {
     case Development = 'development';
+    case Staging = 'staging';
     case Production  = 'production';
 }
