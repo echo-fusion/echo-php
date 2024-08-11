@@ -4,3 +4,4 @@ src/vendor
 src/.phpunit.result.cache
 src/.env
 src/storage/cache
+src/.php-cs-fixer.cache
