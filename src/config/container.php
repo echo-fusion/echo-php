@@ -58,7 +58,7 @@ return function (ContainerInterface $container) {
         return new Response();
     });
     $container->bind(RequestHandlerInterface::class, function (ContainerInterface $container) {
-        return new class() implements RequestHandlerInterface {
+        return new class () implements RequestHandlerInterface {
             public function handle(ServerRequestInterface $request): ResponseInterface
             {
                 return new Response();

@@ -22,7 +22,7 @@ final class MiddlewareFactory implements MiddlewareFactoryInterface
         GuestMiddleware::class,
     ];
 
-    public function __construct(Private readonly ContainerInterface $container)
+    public function __construct(private readonly ContainerInterface $container)
     {
     }
 

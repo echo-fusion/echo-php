@@ -15,7 +15,7 @@ class GuestMiddleware implements MiddlewareInterface
     public function __construct(private readonly SessionInterface $session)
     {
     }
-    
+
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $user = $this->session->has('user') && $this->session->get('user');
@@ -25,7 +25,7 @@ class GuestMiddleware implements MiddlewareInterface
             header('location: /');
             exit();
         }
-        
+
         return $handler->handle($request);
     }
 }

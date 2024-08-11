@@ -68,12 +68,12 @@ class Container implements ContainerInterface
         $constructor = $reflectionClass->getConstructor();
         // without any dependencies
         if (!$constructor) {
-            return new $id;
+            return new $id();
         }
 
         $parameters = $constructor->getParameters();
         if (!$parameters) {
-            return new $id;
+            return new $id();
         }
 
         // resolve params which are classes

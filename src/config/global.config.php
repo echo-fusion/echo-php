@@ -2,7 +2,6 @@
 
 use App\Enums\AppEnvironment;
 
-
 return [
     'database_info' => [
         'host' => $_ENV['DB_HOST'],
@@ -10,12 +9,16 @@ return [
         'password' => $_ENV['DB_PASS'],
         'dbname' => $_ENV['DB_DATABASE'],
         'driver' => $_ENV['DB_DRIVER'] ?? 'pdo_mysql',
+        "engine" => "innodb",
+        "charset" => "utf8mb4",
+        "collation" => "utf8mb4",
+        "collate" => "utf8mb4_unicode_ci"
     ],
     'migrations' => [
         'table_storage' => [
             'table_name' => 'doctrine_migration_versions',
             'version_column_name' => 'version',
-            'version_column_length' => 1024,
+            'version_column_length' => 192,
             'executed_at_column_name' => 'executed_at',
             'execution_time_column_name' => 'execution_time',
         ],

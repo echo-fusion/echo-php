@@ -5,14 +5,9 @@ declare(strict_types=1);
 namespace App;
 
 use App\Contracts\ConfigInterface;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use ReflectionException;
 use App\Contracts\RouterInterface;
 use Psr\Container\ContainerInterface;
-use App\Exceptions\RouteNotFoundException;
 
 class App
 {

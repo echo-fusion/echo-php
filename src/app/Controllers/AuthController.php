@@ -25,9 +25,6 @@ class AuthController extends AbstractController
 
     public function login(ServerRequestInterface $request)
     {
-        var_dump();die();
-
-
         $input = $_POST;
         try {
             $validator = new Validator($input);

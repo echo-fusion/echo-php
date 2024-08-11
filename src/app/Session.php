@@ -19,7 +19,8 @@ class Session implements SessionInterface
             throw new SessionException('Headers have already sent by ' . $fileName . ':' . $line);
         }
 
-        session_set_cookie_params([
+        session_set_cookie_params(
+            [
                 'secure' => true,
                 'httponly' => true,
                 'samesite' => 'lax',
