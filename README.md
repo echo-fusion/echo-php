@@ -15,7 +15,7 @@ now you can navigate to http://localhost:8000 to visit pages.
 if you want to import database and tables table run this command inside the container
 ```
 make shell
- >> php migraion-cli.php
+ >> ./vendor/bin/doctrine-migrations migrate
 ```
 
 ## Test

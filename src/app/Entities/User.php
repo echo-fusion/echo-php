@@ -15,7 +15,7 @@ use Doctrine\ORM\Mapping\Table;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 
 #[Entity]
-#[Table('users')]
+#[Table(name: 'users')]
 #[HasLifecycleCallbacks]
 class User
 {
@@ -23,13 +23,13 @@ class User
     #[Column, GeneratedValue]
     private int $id;
 
-    #[Column(type: 'string')]
+    #[Column(type: 'string', length: 50)]
     private string $name;
 
-    #[Column(type: 'string')]
+    #[Column(type: 'string', length: 100)]
     private string $email;
 
-    #[Column(type: 'string')]
+    #[Column(type: 'text')]
     private string $password;
 
     #[Column(name: 'created_at')]

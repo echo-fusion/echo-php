@@ -13,7 +13,7 @@ use Doctrine\ORM\EntityManagerInterface;
 $app = require __DIR__ . '/bootstrap.php';
 
 /** @var Config $config */
-$config = $app->getContainer()->get(Config::class);
+$config = $app->getContainer()->get(Config::class)->getMerged();
 $migrationsConfig = $config['migrations'];
 
 /** @var EntityManagerInterface $entityManager */
