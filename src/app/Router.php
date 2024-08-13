@@ -5,79 +5,81 @@ declare(strict_types=1);
 namespace App;
 
 use App\Contracts\RouterInterface;
+use App\Contracts\ServiceManagerInterface;
+use App\Enums\HttpMethod;
 use App\Exceptions\RouteNotFoundException;
 use App\Middlewares\Pattern\MiddlewarePipeline;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Webmozart\Assert\Assert;
 
 class Router implements RouterInterface
 {
+    /**
+     * @var list<Route>
+     */
     private array $routes = [];
 
     public function __construct(
-        protected readonly ContainerInterface $container,
+        protected readonly ServiceManagerInterface $container,
         protected readonly MiddlewarePipeline $middlewarePipeline,
     ) {
     }
 
-    public function register(string $requestMethod, string $route, callable|array $action): self
+    public function register(HttpMethod $method, string $route, array $action): self
     {
-        $this->routes[] = [
-            'method' => $requestMethod,
-            'route' => $route,
-            'action' => $action,
-            'middlewares' => clone $this->middlewarePipeline,
-        ];
+        $this->routes[] = new Route(
+            method: $method,
+            route: $route,
+            action: $action,
+            middlewarePipeline: new MiddlewarePipeline(),
+        );
 
         return $this;
     }
 
-    /**
-     * @param list<string> $middlewares
-     * @return Router
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
     public function middlewares(string ...$middlewares): self
     {
         $lastIndex = array_key_last($this->routes);
+        Assert::notNull($lastIndex);
+        Assert::keyExists($this->routes, $lastIndex);
         $lastRoute = $this->routes[$lastIndex];
 
-        /**@var MiddlewarePipeline $routeMiddleware */
-        $routeMiddlewarePipeline = $lastRoute['middlewares'];
-
+        $routeMiddlewarePipeline = $lastRoute->getMiddlewarePipeline();
+        Assert::notNull($routeMiddlewarePipeline);
         foreach ($middlewares as $middleware) {
             $routeMiddlewarePipeline->pipe(
                 $this->container->get($middleware)
             );
         }
-
-        $this->routes[$lastIndex]['middlewares'] = $routeMiddlewarePipeline;
+        $lastRoute->setMiddlewarePipeline($routeMiddlewarePipeline);
 
         return $this;
     }
 
-    public function get(string $route, callable|array $action): self
+    public function get(string $route, array $action): self
     {
-        return $this->register('get', $route, $action);
+        return $this->register(HttpMethod::GET, $route, $action);
     }
 
-    public function post(string $route, callable|array $action): self
+    public function post(string $route, array $action): self
     {
-        return $this->register('post', $route, $action);
+        return $this->register(HttpMethod::POST, $route, $action);
     }
 
-    public function put(string $route, callable|array $action): self
+    public function put(string $route, array $action): self
     {
-        return $this->register('put', $route, $action);
+        return $this->register(HttpMethod::PUT, $route, $action);
     }
 
-    public function delete(string $route, callable|array $action): self
+    public function patch(string $route, array $action): self
     {
-        return $this->register('delete', $route, $action);
+        return $this->register(HttpMethod::PATCH, $route, $action);
+    }
+
+    public function delete(string $route, array $action): self
+    {
+        return $this->register(HttpMethod::DELETE, $route, $action);
     }
 
     public function routes(): array
@@ -92,18 +94,17 @@ class Router implements RouterInterface
 
         $action = null;
         foreach ($this->routes as $route) {
-            if ($route['route'] == $requestRoute && $route['method'] == strtolower($requestMethod)) {
-                // run middleware
-                /** @var MiddlewarePipeline $routeMiddlewaresPipeline */
-                $routeMiddlewaresPipeline = $route['middlewares'];
+            if ($route->getRoute() == $requestRoute && $route->getMethod() == strtolower($requestMethod)) {
+                // run route middlewares
+                $routeMiddlewaresPipeline = $route->getMiddlewarePipeline();
+                Assert::notNull($routeMiddlewaresPipeline);
                 if (!$routeMiddlewaresPipeline->isPipeLineEmpty()) {
                     $routeMiddlewaresPipeline->process(
                         $request,
                         $this->container->get(RequestHandlerInterface::class)
                     );
                 }
-
-                $action = $route['action'];
+                $action = $route->getAction();
             }
         }
 
