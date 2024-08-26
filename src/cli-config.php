@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-use App\App;
-use App\Config;
+use App\Application;
+use App\Components\Config\Config;
 use Doctrine\Migrations\Configuration\EntityManager\ExistingEntityManager;
 use Doctrine\Migrations\Configuration\Migration\ConfigurationArray;
 use Doctrine\Migrations\DependencyFactory;
 use Doctrine\ORM\EntityManagerInterface;
 
-/** @var App $app * */
+/** @var Application $app * */
 $app = require __DIR__ . '/bootstrap.php';
 
 /** @var Config $config */

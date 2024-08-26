@@ -2,10 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Components\Config\Config;
-use App\Components\Config\ConfigInterface;
 use App\Components\Container\DependenciesRepositoryInterface;
-use App\Components\Controller\Controller;
 use App\Components\DB\DB;
 use App\Components\DB\DBFactory;
 use App\Components\Middleware\MiddlewareManagerFactory;
@@ -25,19 +22,18 @@ use App\Factories\EntityManagerFactory;
 use App\Factories\ServerRequestFactory;
 use App\Factories\TwigEnvironmentFactory;
 use App\Middlewares\AuthMiddleware;
-use App\Middlewares\Factories\AuthMiddlewareFactory;
-use App\Middlewares\Factories\GuestMiddlewareFactory;
-use App\Middlewares\Factories\StartSessionMiddlewareFactory;
+use App\Middlewares\AuthMiddlewareFactory;
 use App\Middlewares\GuestMiddleware;
+use App\Middlewares\GuestMiddlewareFactory;
 use App\Middlewares\ResponseTypeMiddleware;
 use App\Middlewares\StartSessionMiddleware;
+use App\Middlewares\StartSessionMiddlewareFactory;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Webmozart\Assert\Assert;
 
 return function (DependenciesRepositoryInterface $dependenciesRepository) {
     //---First party---

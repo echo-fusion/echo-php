@@ -1,7 +1,7 @@
 <?php
 
-use App\Config;
-use App\Enums\AppEnvironment;
+use App\Components\Config\Config;
+use App\Components\Environment\AppEnvironment;
 
 $appEnv = isset($_ENV['APP_ENV']) ?
     AppEnvironment::from($_ENV['APP_ENV'])->value :
