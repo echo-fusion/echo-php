@@ -2,93 +2,68 @@
 
 declare(strict_types=1);
 
-use App\Auth;
-use App\Config;
-use App\Contracts\AuthInterface;
-use App\Contracts\MiddlewareFactoryInterface;
-use App\Contracts\SessionInterface;
-use App\DB;
-use App\Enums\AppEnvironment;
-use App\MiddlewareFactory;
-use App\Modules\User\Contracts\UserRepositoryInterface;
-use App\Modules\User\Repositories\UserRepository;
-use App\Session;
+use App\Components\Config\Config;
+use App\Components\Config\ConfigInterface;
+use App\Components\Container\DependenciesRepositoryInterface;
+use App\Components\Controller\Controller;
+use App\Components\DB\DB;
+use App\Components\DB\DBFactory;
+use App\Components\Middleware\MiddlewareManagerFactory;
+use App\Components\Middleware\MiddlewareManagerInterface;
+use App\Components\Middleware\RequestHandlerFactory;
+use App\Components\Response\Html\Handlers\Twig;
+use App\Components\Response\Html\Handlers\TwigFactory;
+use App\Components\Response\Html\HtmlResponseFactory;
+use App\Components\Response\Html\HtmlResponseInterface;
+use App\Components\Session\Session;
+use App\Components\Session\SessionInterface;
+use App\Controllers\ApiController;
+use App\Controllers\HomeController;
+use App\Controllers\HomeControllerFactory;
+use App\Factories\ConnectionFactory;
+use App\Factories\EntityManagerFactory;
+use App\Factories\ServerRequestFactory;
+use App\Factories\TwigEnvironmentFactory;
+use App\Middlewares\AuthMiddleware;
+use App\Middlewares\Factories\AuthMiddlewareFactory;
+use App\Middlewares\Factories\GuestMiddlewareFactory;
+use App\Middlewares\Factories\StartSessionMiddlewareFactory;
+use App\Middlewares\GuestMiddleware;
+use App\Middlewares\ResponseTypeMiddleware;
+use App\Middlewares\StartSessionMiddleware;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DriverManager;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\ORMSetup;
-use Guzzle\Stream\Stream;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\ServerRequest;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Twig\Loader\FilesystemLoader;
+use Webmozart\Assert\Assert;
 
-return function (ContainerInterface $container) {
-    // bind core dependencies
-    $container->bind(SessionInterface::class, Session::class);
-    $container->bind(UserRepositoryInterface::class, UserRepository::class);
-    $container->bind(AuthInterface::class, Auth::class);
-    $container->bind(Config::class, function (ContainerInterface $container) {
-        return require CONFIG_PATH . '/application.config.php';
-    });
-    $container->bind(DB::class, function (ContainerInterface $container) {
-        $config = $container->get(Config::class);
-        return new DB($config->getMerged()['database_info']);
-    });
-    $container->bind(MiddlewareFactoryInterface::class, function (ContainerInterface $container) {
-        return new MiddlewareFactory($container);
-    });
+return function (DependenciesRepositoryInterface $dependenciesRepository) {
+    //---First party---
+    $dependenciesRepository->setAlias(SessionInterface::class, Session::class);
+    $dependenciesRepository->setInvokable(Session::class);
+    $dependenciesRepository->setFactory(DB::class, DBFactory::class);
+    $dependenciesRepository->setFactory(Twig::class, TwigFactory::class);
+    $dependenciesRepository->setFactory(HtmlResponseInterface::class, HtmlResponseFactory::class);
 
-    // PSR-7 implementations
-    $container->bind(ServerRequestInterface::class, function (ContainerInterface $container) {
-        return new ServerRequest(
-            method: $_SERVER['REQUEST_METHOD'] ?? 'GET',
-            uri: $_SERVER['REQUEST_URI'],
-            headers: getallheaders(),
-            body: new Stream(fopen('php://temp', 'r')),
-            version: isset($_SERVER['SERVER_PROTOCOL']) ? str_replace('HTTP/', '', $_SERVER['SERVER_PROTOCOL']) : '1.1',
-            serverParams: $_SERVER
-        );
-    });
-    $container->bind(ResponseInterface::class, function (ContainerInterface $container) {
-        return new Response();
-    });
-    $container->bind(RequestHandlerInterface::class, function (ContainerInterface $container) {
-        return new class () implements RequestHandlerInterface {
-            public function handle(ServerRequestInterface $request): ResponseInterface
-            {
-                return new Response();
-            }
-        };
-    });
+    $dependenciesRepository->setFactory(MiddlewareManagerInterface::class, MiddlewareManagerFactory::class);
+    $dependenciesRepository->setFactory(StartSessionMiddleware::class, StartSessionMiddlewareFactory::class);
+    $dependenciesRepository->setFactory(GuestMiddleware::class, GuestMiddlewareFactory::class);
+    $dependenciesRepository->setFactory(AuthMiddleware::class, AuthMiddlewareFactory::class);
+    $dependenciesRepository->setInvokable(ResponseTypeMiddleware::class);
 
-    // Doctrine
-    $container->bind(EntityManagerInterface::class, function (ContainerInterface $container) {
-        $db = $container->get(DB::class);
-        return new EntityManager(
-            $db->connection,
-            ORMSetup::createAttributeMetadataConfiguration([APP_PATH . '/Entities'])
-        );
-    });
-    $container->bind(Connection::class, function (ContainerInterface $container) {
-        /** @var Config $config */
-        $config = $container->get(Config::class);
-        return DriverManager::getConnection($config->getMerged()['database_info']);
-    });
+    $dependenciesRepository->setFactory(HomeController::class, HomeControllerFactory::class);
+    $dependenciesRepository->setInvokable(ApiController::class);
 
-    // Twig
-    $container->bind(\Twig\Environment::class, function (ContainerInterface $container) {
-        /** @var Config $config */
-        $config = $container->get(Config::class);
-        $environment = $config->getMerged()['environment'];
-        $loader = new FilesystemLoader(VIEW_PATH);
-        return new \Twig\Environment($loader, [
-            'cache' => STORAGE_PATH . '/cache/templates',
-            'auto_reload' => $environment === AppEnvironment::Development->value,
-        ]);
-    });
+    //---Third party---
+    $dependenciesRepository->setAlias(ResponseInterface::class, Response::class);
+    $dependenciesRepository->setInvokable(Response::class);
+    $dependenciesRepository->setFactory(ServerRequestInterface::class, ServerRequestFactory::class);
+    $dependenciesRepository->setFactory(RequestHandlerInterface::class, RequestHandlerFactory::class);
+
+    $dependenciesRepository->setFactory(Connection::class, ConnectionFactory::class);
+    $dependenciesRepository->setFactory(EntityManagerInterface::class, EntityManagerFactory::class);
+
+    $dependenciesRepository->setFactory(\Twig\Environment::class, TwigEnvironmentFactory::class);
 };

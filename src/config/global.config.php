@@ -1,8 +1,15 @@
 <?php
 
-use App\Enums\AppEnvironment;
+use App\Components\Container\Strategies\AutoWiringStrategy;
+use App\Components\Container\Strategies\DependencyInjectorStrategy;
+use App\Components\Response\Html\Handlers\Twig;
 
 return [
+    'service_manager' => [
+        'allow_override' => true,
+        'resolver' => DependencyInjectorStrategy::class,// AutoWiringStrategy::class | DependencyInjectorStrategy::class
+    ],
+    'html_response_agent' => Twig::class,
     'database_info' => [
         'host' => $_ENV['DB_HOST'],
         'user' => $_ENV['DB_USER'],
