@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace App\Components\Container;
 
 use App\Components\Container\Strategies\ContainerResolverStrategyInterface;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class ServiceManager implements ServiceManagerInterface
 {
     public function __construct(
         private DependenciesRepositoryInterface $dependenciesRepository,
         private readonly ContainerResolverStrategyInterface $containerResolverStrategy,
-        private readonly bool $allowOverride
+        private readonly bool $allowOverride,
+        private readonly AdapterInterface $cacheAdapter
     ) {
         $this->bind($dependenciesRepository);
     }
@@ -44,7 +47,7 @@ class ServiceManager implements ServiceManagerInterface
 
         foreach ($dependenciesRepository->getDependencies() as $id => $entry) {
             if ($this->has($id) && !$this->allowOverride) {
-                throw new ContainerException('Dependency is already exist in container!');
+                throw new ContainerException(sprintf('Dependency "%s" is already exist in container!', $id));
             }
 
             match ($dependenciesRepository->getType($id)) {
@@ -57,6 +60,15 @@ class ServiceManager implements ServiceManagerInterface
 
     public function resolve(string $id): mixed
     {
-        return $this->containerResolverStrategy->resolve($id, $this);
+        $key = $this->convertSlashToDash($id);
+
+        return $this->cacheAdapter->get($key, function (ItemInterface $item) use ($id) {
+            return $this->containerResolverStrategy->resolve($id, $this);
+        });
+    }
+
+    private function convertSlashToDash(string $string): string
+    {
+        return preg_replace('/[\W\s\/]+/', '-', $string);
     }
 }

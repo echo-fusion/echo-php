@@ -25,12 +25,12 @@ $containers($dependenciesRepository);
 // load configs
 $applicationConfig = require CONFIG_PATH . '/application.config.php';
 Assert::isInstanceOf($applicationConfig, ConfigInterface::class);
+$config = $applicationConfig->getMerged();
 $dependenciesRepository->setFactory(ConfigInterface::class, function () use ($applicationConfig) {
     return $applicationConfig;
 });
 
 // initial service manager & application
-$config = $applicationConfig->getMerged();
 Assert::keyExists($config, 'service_manager');
 Assert::keyExists($config['service_manager'], 'resolver');
 Assert::keyExists($config['service_manager'], 'allow_override');
@@ -40,10 +40,21 @@ $resolver = $config['service_manager']['resolver'];
 $resolver = new $resolver;
 Assert::isInstanceOf($resolver, ContainerResolverStrategyInterface::class);
 
+// choosing a cache adapter: for running service manager without cache, just use "NullAdapter"
+Assert::keyExists($config['service_manager'], 'cache_adapter');
+$cacheAdapterClass = $config['service_manager']['cache_adapter'];
+
+$cacheAdapter = new $cacheAdapterClass(
+    namespace: 'service-manager',
+    defaultLifetime: 0,
+    directory: STORAGE_PATH
+);
+
 return new Application(
     new ServiceManager(
         $dependenciesRepository,
         $resolver,
-        $allowOverride
+        $allowOverride,
+        $cacheAdapter
     )
 );

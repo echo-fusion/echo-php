@@ -3,13 +3,23 @@
 use App\Components\Container\Strategies\AutoWiringStrategy;
 use App\Components\Container\Strategies\DependencyInjectorStrategy;
 use App\Components\Response\Html\Handlers\Twig;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 
 return [
     'service_manager' => [
         'allow_override' => true,
-        'resolver' => DependencyInjectorStrategy::class,// AutoWiringStrategy::class | DependencyInjectorStrategy::class
+        'resolver' => DependencyInjectorStrategy::class,
+        'cache_adapter' => FilesystemAdapter::class
     ],
-    'html_response_agent' => Twig::class,
+    'cache' => [
+        'adapter' => ArrayAdapter::class
+    ],
+    'response' =>[
+        'html'=> [
+            'agent' => Twig::class
+        ]
+    ],
     'database_info' => [
         'host' => $_ENV['DB_HOST'],
         'user' => $_ENV['DB_USER'],
