@@ -5,3 +5,5 @@ src/.phpunit.result.cache
 src/.env
 src/storage/cache
 src/.php-cs-fixer.cache
+src/storage
+src/.DS_Store

@@ -4,46 +4,64 @@ declare(strict_types=1);
 
 namespace App\Components\Router;
 
+use Closure;
 use Psr\Http\Message\ServerRequestInterface;
 
 interface RouterInterface
 {
     /**
-     * @param non-empty-string $route
-     * @param list<non-empty-string> $action
+     * @param non-empty-string $name
      */
-    public function register(HttpMethod $method, string $route, array $action): self;
+    public function getRoute(string $name): ?Route;
+
+    public function validateRoute(RouteInterface $rout): RouteInterface;
 
     /**
-     * @param non-empty-string $route
-     * @param list<non-empty-string> $action
+     * @param non-empty-string $name
+     * @param non-empty-string $path
+     * @param list<non-empty-string>|Closure $action
+     * @param array<array-key,non-empty-string>|null $constraints
      */
-    public function get(string $route, array $action): self;
+    public function get(string $name, string $path, array|Closure $action, ?array $constraints = []): self;
 
     /**
-     * @param non-empty-string $route
-     * @param list<non-empty-string> $action
+     * @param non-empty-string $name
+     * @param non-empty-string $path
+     * @param list<non-empty-string>|Closure $action
+     * @param array<array-key,non-empty-string>|null $constraints
      */
-    public function post(string $route, array $action): self;
+    public function post(string $name, string $path, array|Closure $action, ?array $constraints = []): self;
 
     /**
-     * @param non-empty-string $route
-     * @param list<non-empty-string> $action
+     * @param non-empty-string $name
+     * @param non-empty-string $path
+     * @param list<non-empty-string>|Closure $action
+     * @param array<array-key,non-empty-string>|null $constraints
      */
-    public function put(string $route, array $action): self;
+    public function put(string $name, string $path, array|Closure $action, ?array $constraints = []): self;
 
     /**
-     * @param non-empty-string $route
-     * @param list<non-empty-string> $action
+     * @param non-empty-string $name
+     * @param non-empty-string $path
+     * @param list<non-empty-string>|Closure $action
+     * @param array<array-key,non-empty-string>|null $constraints
      */
-    public function delete(string $route, array $action): self;
+    public function patch(string $name, string $path, array|Closure $action, ?array $constraints = []): self;
 
     /**
-     * @return Route
+     * @param non-empty-string $name
+     * @param non-empty-string $path
+     * @param list<non-empty-string>|Closure $action
+     * @param array<array-key,non-empty-string>|null $constraints
+     */
+    public function delete(string $name, string $path, array|Closure $action, ?array $constraints = []): self;
+
+    /**
+     * @return array<Route>
      */
     public function routes(): array;
 
-    public function resolve(ServerRequestInterface $request): mixed;
+    public function dispatch(ServerRequestInterface $request): mixed;
 
     /**
      * @param non-empty-string ...$middlewares

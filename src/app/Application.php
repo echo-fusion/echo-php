@@ -23,7 +23,7 @@ class Application
 
     public function run()
     {
-        echo $this->router->resolve($this->request);
+        echo $this->router->dispatch($this->request);
     }
 
     public function getServiceManager(): ServiceManagerInterface
