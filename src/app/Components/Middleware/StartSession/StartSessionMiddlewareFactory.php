@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Middlewares;
+namespace App\Components\Middleware\StartSession;
 
 use App\Components\Container\ServiceManagerInterface;
 use App\Components\Session\SessionInterface;

@@ -5,17 +5,15 @@ declare(strict_types=1);
 namespace App\Components\Middleware;
 
 use App\Components\Container\ServiceManagerInterface;
-use App\Middlewares\AuthMiddleware;
-use App\Middlewares\GuestMiddleware;
-use App\Middlewares\Pattern\MiddlewarePipeline;
-use App\Middlewares\ResponseTypeMiddleware;
-use App\Middlewares\StartSessionMiddleware;
+use App\Components\Middleware\Auth\AuthMiddleware;
+use App\Components\Middleware\Guest\GuestMiddleware;
+use App\Components\Middleware\Pattern\MiddlewarePipelineInterface;
+use App\Components\Middleware\StartSession\StartSessionMiddleware;
 
 final class MiddlewareManager implements MiddlewareManagerInterface
 {
     public const CORE_MIDDLEWARES = [
         StartSessionMiddleware::class,
-        ResponseTypeMiddleware::class,
     ];
 
     public const ROUTE_MIDDLEWARES = [
@@ -23,19 +21,19 @@ final class MiddlewareManager implements MiddlewareManagerInterface
         GuestMiddleware::class,
     ];
 
-    public function __construct(private readonly ServiceManagerInterface $serviceManager)
-    {
+    public function __construct(
+        private readonly ServiceManagerInterface $serviceManager,
+        private readonly MiddlewarePipelineInterface $middlewarePipeline
+    ) {
     }
 
-    public function createPipeline(): MiddlewarePipeline
+    public function createPipelineFromCoreMiddlewares(): MiddlewarePipelineInterface
     {
-        $pipeline = new MiddlewarePipeline();
-
         foreach (self::CORE_MIDDLEWARES as $middleware) {
-            $pipeline->pipe($this->serviceManager->get($middleware));
+            $this->middlewarePipeline->pipe($this->serviceManager->get($middleware));
         }
 
-        return $pipeline;
+        return $this->middlewarePipeline;
     }
 
     public function isRouteMiddlewareValid(string $middlewareFQDN): bool

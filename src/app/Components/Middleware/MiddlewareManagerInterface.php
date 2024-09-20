@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Components\Middleware;
 
-use App\Middlewares\Pattern\MiddlewarePipeline;
+use App\Components\Middleware\Pattern\MiddlewarePipelineInterface;
 
 interface MiddlewareManagerInterface
 {
-    public function createPipeline(): MiddlewarePipeline;
+    public function createPipelineFromCoreMiddlewares(): MiddlewarePipelineInterface;
 
     public function isRouteMiddlewareValid(string $middlewareFQDN): bool;
 }

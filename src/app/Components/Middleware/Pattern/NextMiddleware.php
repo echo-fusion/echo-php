@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Middlewares\Pattern;
+namespace App\Components\Middleware\Pattern;
 
 use DomainException;
 use Psr\Http\Message\ResponseInterface;
