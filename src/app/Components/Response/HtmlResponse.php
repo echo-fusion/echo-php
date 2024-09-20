@@ -10,13 +10,13 @@ use GuzzleHttp\Psr7\Response;
 
 class HtmlResponse extends Response
 {
-    use InjectContentTypeTrait;
+    use InjectHeaderTrait;
 
     public function __construct($html, int $status = 200, array $headers = [])
     {
         parent::__construct(
             status: $status,
-            headers: $this->injectContentType('text/html; charset=utf-8', $headers),
+            headers: $this->injectHeader('content-type','text/html; charset=utf-8', $headers),
             body: $this->createBody($html)
         );
     }

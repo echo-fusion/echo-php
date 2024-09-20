@@ -9,7 +9,7 @@ use GuzzleHttp\Psr7\Response;
 
 class JsonResponse extends Response
 {
-    use InjectContentTypeTrait;
+    use InjectHeaderTrait;
 
     public const DEFAULT_JSON_FLAGS = JSON_HEX_TAG
         | JSON_HEX_APOS
@@ -32,8 +32,8 @@ class JsonResponse extends Response
 
         parent::__construct(
             status: $status,
-            headers: $this->injectContentType('application/json', $headers),
-            body: $this->jsonEncode($data, $this->encodingOptions)// $this->createBodyFromJson($json);
+            headers: $this->injectHeader('content-type','application/json', $headers),
+            body: $this->jsonEncode($data, $this->encodingOptions)
         );
     }
 

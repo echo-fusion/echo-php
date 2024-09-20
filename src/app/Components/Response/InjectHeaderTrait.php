@@ -8,18 +8,18 @@ use function array_keys;
 use function array_reduce;
 use function strtolower;
 
-trait InjectContentTypeTrait
+trait InjectHeaderTrait
 {
-    private function injectContentType(string $contentType, array $headers): array
+    private function injectHeader(string $key,string $value,  array $headers): array
     {
         $hasContentType = array_reduce(
             array_keys($headers),
-            static fn ($carry, $item) => $carry ?: strtolower($item) === 'content-type',
+            static fn ($carry, $item) => $carry ?: strtolower($item) === $key,
             false
         );
 
         if (! $hasContentType) {
-            $headers['content-type'] = [$contentType];
+            $headers[$key] = [$value];
         }
 
         return $headers;
