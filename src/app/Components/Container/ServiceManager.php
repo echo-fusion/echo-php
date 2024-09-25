@@ -60,9 +60,9 @@ class ServiceManager implements ServiceManagerInterface
 
     public function resolve(string $id): mixed
     {
-        $key = $this->convertSlashToDash($id);
+        $cacheKey = $this->convertSlashToDash($id);
 
-        return $this->cacheAdapter->get($key, function (ItemInterface $item) use ($id) {
+        return $this->cacheAdapter->get($cacheKey, function (ItemInterface $item) use ($id) {
             return $this->containerResolverStrategy->resolve($id, $this);
         });
     }

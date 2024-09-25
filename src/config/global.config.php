@@ -5,15 +5,16 @@ use App\Components\Container\Strategies\DependencyInjectorStrategy;
 use App\Components\Response\Html\Handlers\Twig;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\Cache\Adapter\NullAdapter;
 
 return [
     'service_manager' => [
         'allow_override' => true,
         'resolver' => DependencyInjectorStrategy::class,
-        'cache_adapter' => FilesystemAdapter::class
+        'cache_adapter' => NullAdapter::class,
     ],
     'cache' => [
-        'adapter' => ArrayAdapter::class
+        'adapter' => NullAdapter::class
     ],
     'response' =>[
         'html'=> [

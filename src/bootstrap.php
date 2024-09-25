@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Application;
 use App\Components\Config\ConfigInterface;
 use App\Components\Container\DependenciesRepository;
+use App\Components\Container\DependenciesRepositoryInterface;
 use App\Components\Container\ServiceManager;
 use App\Components\Container\Strategies\ContainerResolverStrategyInterface;
 use Dotenv\Dotenv;
@@ -22,10 +23,16 @@ $dependenciesRepository = new DependenciesRepository();
 $containers = require CONFIG_PATH . '/container.php';
 $containers($dependenciesRepository);
 
+$dependenciesRepository->setFactory(DependenciesRepositoryInterface::class, function () use ($dependenciesRepository) {
+    return $dependenciesRepository;
+});
+
 // load configs
+/** @var ConfigInterface $applicationConfig */
 $applicationConfig = require CONFIG_PATH . '/application.config.php';
 Assert::isInstanceOf($applicationConfig, ConfigInterface::class);
 $config = $applicationConfig->getMerged();
+
 $dependenciesRepository->setFactory(ConfigInterface::class, function () use ($applicationConfig) {
     return $applicationConfig;
 });
@@ -44,11 +51,14 @@ Assert::isInstanceOf($resolver, ContainerResolverStrategyInterface::class);
 Assert::keyExists($config['service_manager'], 'cache_adapter');
 $cacheAdapterClass = $config['service_manager']['cache_adapter'];
 
-$cacheAdapter = new $cacheAdapterClass(
+$cacheAdapter = new \Symfony\Component\Cache\Adapter\NullAdapter();
+/**
+ $cacheAdapter = new $cacheAdapterClass(
     namespace: 'service-manager',
     defaultLifetime: 0,
     directory: STORAGE_PATH
 );
+ */
 
 return new Application(
     new ServiceManager(
