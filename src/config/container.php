@@ -36,15 +36,16 @@ use App\Controllers\HomeController;
 use App\Controllers\HomeControllerFactory;
 use App\Factories\ConnectionFactory;
 use App\Factories\EntityManagerFactory;
+use App\Factories\LoggerFactory;
 use App\Factories\ServerRequestFactory;
 use App\Factories\TwigEnvironmentFactory;
-use App\Middlewares\ResponseTypeMiddleware;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Log\LoggerInterface;
 
 return function (DependenciesRepositoryInterface $dependenciesRepository) {
     //---First party---
@@ -80,4 +81,6 @@ return function (DependenciesRepositoryInterface $dependenciesRepository) {
     $dependenciesRepository->setFactory(EntityManagerInterface::class, EntityManagerFactory::class);
 
     $dependenciesRepository->setFactory(\Twig\Environment::class, TwigEnvironmentFactory::class);
+
+    $dependenciesRepository->setFactory(LoggerInterface::class, LoggerFactory::class);
 };
