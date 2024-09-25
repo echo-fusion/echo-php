@@ -1,11 +1,12 @@
-# Simple php framework
+![echoPHP Logo](./logo.png)
+
 
 ## Running the project
-For the first time
+For the first time:
 ```
 make build
 ```
-and for future running just type this without any build or runnig composer
+and for future running containers just type:
 ```
 make up
 ```
