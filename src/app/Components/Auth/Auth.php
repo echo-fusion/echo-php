@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Components\Auth;
 
 use App\Components\Session\SessionInterface;
+use App\Components\User\UserRepositoryInterface;
 use App\Entities\User;
-use Modules\User\Contracts\UserRepositoryInterface;
 
 class Auth implements AuthInterface
 {
