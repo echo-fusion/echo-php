@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Components\Router;
 
+use Closure;
+use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface;
+use Webmozart\Assert\Assert;
 use App\Components\Middleware\MiddlewareManagerInterface;
 use App\Components\Middleware\Pattern\MiddlewarePipeline;
 use App\Components\Router\ParseRequestBody\RequestBodyParserInterface;
-use Closure;
-use SplQueue;
-use Webmozart\Assert\Assert;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -104,30 +105,16 @@ class Router implements RouterInterface
         Assert::keyExists($this->routes, $lastIndex);
         $lastRoute = $this->routes[$lastIndex];
 
-        $routeMiddlewarePipeline = $lastRoute->getMiddlewarePipeline();
-        if (!$routeMiddlewarePipeline instanceof MiddlewarePipelineInterface) {
-            $routeMiddlewarePipeline = new MiddlewarePipeline();
-        }
-
         foreach ($middlewares as $middleware) {
-            $routeMiddlewarePipeline->pipe($this->serviceManager->get($middleware));
+            if (!class_exists($middleware)) {
+                throw new \Exception(sprintf('Middleware %s can not be added to route because it doesnt exist!',
+                    $middleware));
+            }
         }
 
-        $lastRoute->setMiddlewarePipeline($routeMiddlewarePipeline);
+        $lastRoute->setMiddlewarePipeline($middlewares);
 
         return $this;
-    }
-
-    private function dispatchMiddlewares(RouteInterface $route, ServerRequestInterface $request): void
-    {
-        // core middlewares
-        $corePipeline = $this->middlewareManager->createPipelineFromCoreMiddlewares();
-        $corePipeline->process($request, $this->serviceManager->get(RequestHandlerInterface::class));
-        // route middlewares
-        $routeMiddlewaresPipeline = $route->getMiddlewarePipeline();
-        if ($routeMiddlewaresPipeline instanceof MiddlewarePipelineInterface) {
-            $routeMiddlewaresPipeline->process($request, $this->serviceManager->get(RequestHandlerInterface::class));
-        }
     }
 
     /**
@@ -145,7 +132,8 @@ class Router implements RouterInterface
             $routeMatch = $route->match($request);
             if ($routeMatch instanceof RouteMatchInterface) {
                 $action = $route->getAction();
-                $this->dispatchMiddlewares($route, $request);
+                // add route middlewares
+                $this->middlewareManager->add($route->getMiddlewares());
                 break;
             }
         }
@@ -156,19 +144,38 @@ class Router implements RouterInterface
 
         $request = $request->withAttribute(RouteMatchInterface::REQUEST_KEY, $routeMatch);
 
-        if (is_callable($action)) {
-            return call_user_func($action, $request);
-        }
-
-        Assert::isArray($action);
-        [$class, $method] = $action;
-        if (class_exists($class)) {
-            $class = $this->serviceManager->get($class);
-            if (method_exists($class, $method)) {
-                return call_user_func([$class, $method], $request);
-            }
-        }
-
-        throw new RouteNotFoundException();
+        return $this->middlewareManager->dispatch(
+            $request,
+            $this->createActionHandler($action)
+        );
     }
+
+    private function createActionHandler($action): RequestHandlerInterface
+    {
+        return new class($action, $this->serviceManager) implements RequestHandlerInterface {
+            public function __construct(private readonly string $action, private readonly ContainerInterface $container)
+            {
+            }
+
+            public function handle(ServerRequestInterface $request): ResponseInterface
+            {
+                if (is_callable($this->action)) {
+                    return call_user_func($this->action, $request);
+                }
+
+                [$class, $method] = $this->action;
+
+                if (class_exists($class)) {
+                    $controller = $this->container->get($class);
+
+                    if (method_exists($controller, $method)) {
+                        return call_user_func([$controller, $method], $request);
+                    }
+                }
+
+                throw new RouteNotFoundException("Action not found.");
+            }
+        };
+    }
+
 }

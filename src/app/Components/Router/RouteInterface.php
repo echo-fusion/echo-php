@@ -27,9 +27,9 @@ interface RouteInterface
 
     public function setAction(array|Closure $action): self;
 
-    public function getMiddlewarePipeline(): ?MiddlewarePipelineInterface;
+    public function getMiddlewares(): array;
 
-    public function setMiddlewarePipeline(MiddlewarePipelineInterface $middlewarePipeline): self;
+    public function setMiddlewarePipeline(array $middlewares): self;
 
     public function getConstraints(): ?array;
 

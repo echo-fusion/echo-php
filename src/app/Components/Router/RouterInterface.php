@@ -14,7 +14,7 @@ interface RouterInterface
      */
     public function getRoute(string $name): ?Route;
 
-    public function validateRoute(RouteInterface $rout): RouteInterface;
+    public function validateRoute(RouteInterface $route): RouteInterface;
 
     /**
      * @param non-empty-string $name
