@@ -10,5 +10,7 @@ interface MiddlewarePipelineInterface
 {
     public function isPipeLineEmpty(): bool;
 
-    public function pipe(MiddlewareInterface $middleware): void;
+    public function add(MiddlewareInterface $middleware): void;
+
+    public function remove(MiddlewareInterface $middleware): void;
 }

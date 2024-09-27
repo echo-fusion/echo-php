@@ -4,40 +4,69 @@ declare(strict_types=1);
 
 namespace App\Components\Middleware;
 
-use App\Components\Container\ServiceManagerInterface;
-use App\Components\Middleware\Auth\AuthMiddleware;
-use App\Components\Middleware\Guest\GuestMiddleware;
 use App\Components\Middleware\Pattern\MiddlewarePipelineInterface;
-use App\Components\Middleware\StartSession\StartSessionMiddleware;
+use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use function in_array;
 
 final class MiddlewareManager implements MiddlewareManagerInterface
 {
-    public const CORE_MIDDLEWARES = [
-        StartSessionMiddleware::class,
-    ];
-
-    public const ROUTE_MIDDLEWARES = [
-        AuthMiddleware::class,
-        GuestMiddleware::class,
-    ];
-
+    /**
+     * @param MiddlewarePipelineInterface $middlewarePipeline
+     * @param class-string[] $coreMiddlewares
+     * @param class-string[] $routeMiddlewares
+     */
     public function __construct(
-        private readonly ServiceManagerInterface $serviceManager,
-        private readonly MiddlewarePipelineInterface $middlewarePipeline
+        private readonly ContainerInterface $container,
+        private readonly MiddlewarePipelineInterface $middlewarePipeline,
+        private readonly array $coreMiddlewares = [],
+        private readonly array $routeMiddlewares = [],
     ) {
+        $this->initialPipeline();
     }
 
-    public function createPipelineFromCoreMiddlewares(): MiddlewarePipelineInterface
+    private function initialPipeline(): void
     {
-        foreach (self::CORE_MIDDLEWARES as $middleware) {
-            $this->middlewarePipeline->pipe($this->serviceManager->get($middleware));
+        if (!$this->middlewarePipeline->isPipeLineEmpty()) {
+            throw new MiddlewareException('Middleware pipeline is already initialized');
         }
 
-        return $this->middlewarePipeline;
+        foreach ($this->coreMiddlewares as $middlewareFQDN) {
+            $this->middlewarePipeline->add(
+                $this->container->get($middlewareFQDN)
+            );
+        }
+    }
+
+    public function add(array $middlewares): void
+    {
+        foreach ($middlewares as $middleware) {
+            if (!class_exists($middleware)) {
+                throw new MiddlewareException(sprintf('Adding %s middleware is not a valid class',$middleware));
+            }
+
+            $this->middlewarePipeline->add(
+                $this->container->get($middleware)
+            );
+        }
+    }
+
+    public function remove(string $middlewareFQDN): void
+    {
+        $this->middlewarePipeline->remove(
+            $this->container->get($middlewareFQDN)
+        );
+    }
+
+    public function dispatch(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    {
+        return $this->middlewarePipeline->process($request, $handler);
     }
 
     public function isRouteMiddlewareValid(string $middlewareFQDN): bool
     {
-        return in_array($middlewareFQDN, self::ROUTE_MIDDLEWARES, true);
+        return in_array($middlewareFQDN, $this->routeMiddlewares, true);
     }
 }

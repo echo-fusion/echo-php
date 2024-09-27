@@ -12,7 +12,9 @@ use SplQueue;
 
 class MiddlewarePipeline implements MiddlewareInterface, MiddlewarePipelineInterface
 {
-    /** @var SplQueue<MiddlewareInterface> */
+    /**
+     * @var SplQueue<MiddlewareInterface>
+     */
     private SplQueue $pipeline;
 
     public function __construct()
@@ -30,9 +32,23 @@ class MiddlewarePipeline implements MiddlewareInterface, MiddlewarePipelineInter
         return $this->pipeline->isEmpty();
     }
 
-    public function pipe(MiddlewareInterface $middleware): void
+    public function add(MiddlewareInterface $middleware): void
     {
         $this->pipeline->enqueue($middleware);
+    }
+
+    public function remove(MiddlewareInterface $middleware): void
+    {
+        $tempQueue = new SplQueue();
+
+        while (!$this->isPipeLineEmpty()) {
+            $item = $this->pipeline->dequeue();
+            if ($item !== $middleware) {
+                $tempQueue->enqueue($item);
+            }
+        }
+
+        $this->pipeline = $tempQueue;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
