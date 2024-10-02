@@ -4,19 +4,17 @@ declare(strict_types=1);
 
 namespace App\Components\Router;
 
-use Closure;
-use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ResponseInterface;
-use Webmozart\Assert\Assert;
+use App\Components\Container\ServiceManagerInterface;
 use App\Components\Middleware\MiddlewareManagerInterface;
-use App\Components\Middleware\Pattern\MiddlewarePipeline;
-use App\Components\Router\ParseRequestBody\RequestBodyParserInterface;
+use App\Components\Request\ParseRequestBody\RequestBodyParserInterface;
+use Closure;
 use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use App\Components\Container\ServiceManagerInterface;
-use App\Components\Middleware\Pattern\MiddlewarePipelineInterface;
+use Webmozart\Assert\Assert;
 
 class Router implements RouterInterface
 {
@@ -118,9 +116,9 @@ class Router implements RouterInterface
     }
 
     /**
-     * @throws NotFoundExceptionInterface
+     * @param ServerRequestInterface $request
+     * @return mixed
      * @throws RouteNotFoundException
-     * @throws ContainerExceptionInterface
      */
     public function dispatch(ServerRequestInterface $request): mixed
     {

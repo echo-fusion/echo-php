@@ -5,7 +5,7 @@ namespace App\Components\Module;
 use App\Components\Container\DependenciesRepositoryInterface;
 use App\Components\Container\ServiceManagerInterface;
 use App\Components\Middleware\MiddlewareManagerInterface;
-use App\Components\Router\ParseRequestBody\RequestBodyParserInterface;
+use App\Components\Request\ParseRequestBody\RequestBodyParserInterface;
 use App\Components\Router\Router;
 use App\Components\Template\TemplateBuilderInterface;
 use Modules\Blog\Config;

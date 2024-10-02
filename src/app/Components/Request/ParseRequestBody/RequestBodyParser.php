@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Components\Router\ParseRequestBody;
+namespace App\Components\Request\ParseRequestBody;
 
-use Webmozart\Assert\Assert;
-use App\Components\Router\ParseRequestBody\Parsers\FormParser;
-use App\Components\Router\ParseRequestBody\Parsers\JsonParser;
-use App\Components\Router\ParseRequestBody\Parsers\XmlParser;
+use App\Components\Request\ParseRequestBody\Parsers\FormParser;
+use App\Components\Request\ParseRequestBody\Parsers\JsonParser;
+use App\Components\Request\ParseRequestBody\Parsers\XmlParser;
 use Psr\Http\Message\ServerRequestInterface;
+use Webmozart\Assert\Assert;
 
 class RequestBodyParser implements RequestBodyParserInterface
 {

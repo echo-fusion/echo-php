@@ -6,7 +6,7 @@ namespace App\Components\Router;
 
 use App\Components\Container\ServiceManagerInterface;
 use App\Components\Middleware\MiddlewareManagerInterface;
-use App\Components\Router\ParseRequestBody\RequestBodyParserInterface;
+use App\Components\Request\ParseRequestBody\RequestBodyParserInterface;
 use Webmozart\Assert\Assert;
 
 class RouterFactory

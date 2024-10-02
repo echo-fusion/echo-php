@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Components\Router\ParseRequestBody\Parsers;
+namespace App\Components\Request\ParseRequestBody\Parsers;
 
-use App\Components\Router\ParseRequestBody\ParserInterface;
+use App\Components\Request\ParseRequestBody\ParserInterface;
 
 class JsonParser implements ParserInterface
 {

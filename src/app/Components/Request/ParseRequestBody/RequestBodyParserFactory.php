@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Components\Router\ParseRequestBody;
+namespace App\Components\Request\ParseRequestBody;
 
 use App\Components\Container\ServiceManagerInterface;
 use Psr\Http\Message\ServerRequestInterface;
